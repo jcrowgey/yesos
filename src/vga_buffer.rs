@@ -1,5 +1,4 @@
 use core::fmt;
-use core::fmt::Write;
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
@@ -129,6 +128,23 @@ lazy_static! {
     });
 }
 
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().write_fmt(args).unwrap();
+}
+
 pub fn print_splash() {
     let prev_cc: ColorCode = WRITER.lock().color_code;
     let color_test: [Color; 5] = [
@@ -137,15 +153,13 @@ pub fn print_splash() {
     for row in 0..BUFFER_HEIGHT {
         for col in 0..4 {
             WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[col]);
-            write!(WRITER.lock(), "                ").unwrap();
+            print!("                ");
         }
         WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[4]);
-        write!(WRITER.lock(), "             ").unwrap();
-        if row < BUFFER_HEIGHT - 1 {
-            write!(WRITER.lock(), "\n").unwrap();
-        } else {
+        print!("              ");
+        if row == BUFFER_HEIGHT - 1 {
             WRITER.lock().color_code = prev_cc;
-            write!(WRITER.lock(), "\n").unwrap();
         }
+        println!();
     }
 }

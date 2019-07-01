@@ -14,9 +14,8 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    use core::fmt::Write;
     vga_buffer::print_splash();
-    write!(vga_buffer::WRITER.lock(), "{}", HELLO).unwrap();
+    println!("Yes, this is YesOS.");
+
     loop {}
 }
-
