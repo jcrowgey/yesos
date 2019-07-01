@@ -147,16 +147,22 @@ pub fn _print(args: fmt::Arguments) {
 
 pub fn print_splash() {
     let prev_cc: ColorCode = WRITER.lock().color_code;
-    let color_test: [Color; 5] = [
-        Color::Yellow, Color::Green, Color::Blue, Color::Magenta, Color::Brown
+    let color_test: [Color; 7] = [
+        Color::Red,
+        Color::Brown,
+        Color::Yellow,
+        Color::Green,
+        Color::Cyan,
+        Color::Magenta,
+        Color::Blue,
     ];
+    let bar_width = BUFFER_WIDTH / color_test.len(); // 16
     for row in 0..BUFFER_HEIGHT {
-        for col in 0..4 {
+        for col in 0..color_test.len() -1 {
             WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[col]);
-            print!("                ");
+            print!("{: <1$}", "", bar_width);
         }
-        WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[4]);
-        print!("              ");
+        WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[color_test.len() -1]);
         if row == BUFFER_HEIGHT - 1 {
             WRITER.lock().color_code = prev_cc;
         }
