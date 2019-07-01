@@ -5,7 +5,7 @@ use core::panic::PanicInfo;
 
 mod vga_buffer;
 
-// static HELLO: &[u8] = b"Yes, this is YesOS.";
+static HELLO: &str = &"Yes, this is YesOS.";
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -14,7 +14,9 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_test();
-
+    use core::fmt::Write;
+    vga_buffer::print_splash();
+    write!(vga_buffer::WRITER.lock(), "{}", HELLO).unwrap();
     loop {}
 }
+

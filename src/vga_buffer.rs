@@ -1,4 +1,7 @@
 use core::fmt;
+use core::fmt::Write;
+use lazy_static::lazy_static;
+use spin::Mutex;
 use volatile::Volatile;
 
 #[allow(dead_code)]
@@ -118,38 +121,31 @@ impl fmt::Write for Writer {
     }
 }
 
-pub fn print_test() {
-    use core::fmt::Write;
-    let mut writer = Writer {
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
+    });
+}
 
+pub fn print_splash() {
+    let prev_cc: ColorCode = WRITER.lock().color_code;
     let color_test: [Color; 5] = [
         Color::Yellow, Color::Green, Color::Blue, Color::Magenta, Color::Brown
     ];
-
-    for r in 0..BUFFER_HEIGHT {
+    for row in 0..BUFFER_HEIGHT {
         for col in 0..4 {
-            writer.color_code = ColorCode::new(Color::Black, color_test[col]);
-            write!(writer, "                ").unwrap();
+            WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[col]);
+            write!(WRITER.lock(), "                ").unwrap();
         }
-        writer.color_code = ColorCode::new(Color::Black, color_test[4]);
-        write!(writer, "             ").unwrap();
-        if r == BUFFER_HEIGHT - 1 {
-            writer.color_code = ColorCode::new(Color::Green, Color::Black);
-            write!(writer, "\nYesOS ready");
+        WRITER.lock().color_code = ColorCode::new(Color::Black, color_test[4]);
+        write!(WRITER.lock(), "             ").unwrap();
+        if row < BUFFER_HEIGHT - 1 {
+            write!(WRITER.lock(), "\n").unwrap();
+        } else {
+            WRITER.lock().color_code = prev_cc;
+            write!(WRITER.lock(), "\n").unwrap();
         }
-        write!(writer, "\n");
     }
-
-    writer.write_byte(b'Y');
-    writer.write_string("esOS ...");
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
-
-    /*for i in 0..212 {
-        write!(writer, "I'm writing {}.\n", i);
-    }
-    */
 }
