@@ -5,29 +5,23 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use yesos::println;
-use yesos::vga_buffer;
+use yesos::{println, serial_print, serial_println};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_splash();
-    println!("Yes, this is YesOS.");
-
-    #[cfg(test)]
     test_main();
 
     loop {}
 }
 
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    println!("{}", info);
-    loop {}
-}
-
-#[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     yesos::test_panic_handler(info)
+}
+
+#[test_case]
+fn test_println() {
+    serial_print!("test_println... ");
+    println!("test_println output");
+    serial_println!("[ok]");
 }
