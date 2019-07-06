@@ -15,8 +15,6 @@ pub extern "C" fn _start() -> ! {
 
     yesos::init();
 
-    x86_64::instructions::interrupts::int3();
-
     #[cfg(test)]
     test_main();
 
