@@ -13,9 +13,14 @@ pub extern "C" fn _start() -> ! {
     vga_buffer::print_splash();
     println!("Yes, this is YesOS.");
 
+    yesos::init();
+
+    x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
 
+    println!("It did not crash!");
     loop {}
 }
 
