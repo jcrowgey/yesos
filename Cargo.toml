@@ -5,7 +5,7 @@ authors = ["Joshua Crowgey <+@0x2b.net>"]
 edition = "2018"
 
 [dependencies]
-bootloader = "0.6.0"
+bootloader = {version = "0.6.0", features = ["map_physical_memory"]}
 spin = "0.4.9"
 volatile = "0.2.3"
 x86_64 = "0.7.0"
@@ -25,7 +25,8 @@ panic = "abort"
 
 [package.metadata.bootimage]
 test-args = [
-    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04",
+    "-serial", "stdio",
     "-display", "none"
 ]
 test-success-exit-code = 33  # (0x10 << 1) | 1
