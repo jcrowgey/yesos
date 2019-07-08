@@ -13,8 +13,8 @@ entry_point!(kernel_main);
 
 #[no_mangle]
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use yesos::memory::translate_addr;
-    use x86_64::{structures::paging::PageTable, VirtAddr};
+    use yesos::memory;
+    use x86_64::{structures::paging::MapperAllSizes, VirtAddr};
 
     vga_buffer::disable_cursor();
     vga_buffer::print_splash();
@@ -25,10 +25,8 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Physical memory fully mapped at offset: {:?}", 
              boot_info.physical_memory_offset);
 
-    /* let l4_table = unsafe {
-        active_level_4_table(boot_info.physical_memory_offset)
-    };
-    */
+    let mapper = unsafe { memory::init(boot_info.physical_memory_offset) };
+
 
     let addresses = [
         // the identity-mapped vga buffer page
@@ -43,9 +41,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     for &address in &addresses {
         let virt = VirtAddr::new(address);
-        let phys = unsafe {
-            translate_addr(virt, boot_info.physical_memory_offset)
-        };
+        let phys = mapper.translate_addr(virt);
         println!("{:?} -> {:?}", virt, phys);
     }
 
