@@ -16,8 +16,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use yesos::memory::translate_addr;
     use x86_64::{structures::paging::PageTable, VirtAddr};
 
+    vga_buffer::disable_cursor();
     vga_buffer::print_splash();
     println!("Yes, this is YesOS.");
+
 
     yesos::init();
     println!("Physical memory fully mapped at offset: {:?}", 

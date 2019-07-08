@@ -37,8 +37,7 @@ impl ColorCode {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)] #[repr(C)]
 struct ScreenChar {
     ascii_character: u8,
     color_code: ColorCode,
@@ -171,6 +170,17 @@ pub fn print_splash() {
             WRITER.lock().color_code = prev_cc;
         }
         println!();
+    }
+}
+
+pub fn disable_cursor() {
+    use x86_64::instructions::port::Port;
+    unsafe {
+        let mut port = Port::new(0x3D4);
+        port.write(0x0A as u8);
+
+        let mut port = Port::new(0x3D5);
+        port.write(0x20 as u8);
     }
 }
 
